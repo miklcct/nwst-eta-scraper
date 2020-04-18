@@ -1,0 +1,5 @@
+{
+    "require" : {
+        "miklcct/nwst-mobile-api" : "^1.0"
+    }
+}
