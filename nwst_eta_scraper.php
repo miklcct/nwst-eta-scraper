@@ -83,7 +83,8 @@ if ($stop === NULL) {
     throw new InvalidArgumentException('The stop does not exist');
 }
 
-fputs(STDERR, "Scraping ETA for $routeNumber towards $route->destination at stop $stop->stopName.\n");
+fputs(STDOUT, "Scraping ETA for $routeNumber towards $route->destination at stop $stop->stopName.\n");
+fflush(STDOUT);
 
 /** @var Eta[] $pending_etas */
 $pending_etas = [];
@@ -112,3 +113,4 @@ while (!(($etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound)
 }
 
 show_old_etas($pending_etas);
+fputs(STDOUT, 'Scraping finished at ' . (new DateTimeImmutable())->format('Y-m-d H:i:s') . ".\n");
