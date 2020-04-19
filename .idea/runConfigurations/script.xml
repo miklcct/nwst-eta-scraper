@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="script" type="PhpLocalRunConfigurationType" factoryName="PHP Console" singleton="false" path="$PROJECT_DIR$/nwst_eta_scraper.php" scriptParameters="--debug 118 O">
+    <method v="2" />
+  </configuration>
+</component>

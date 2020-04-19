@@ -30,7 +30,8 @@ function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv
 function show_old_etas(array &$pending_etas) {
     foreach ($pending_etas as &$old_eta) {
         if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -60) {
-            fputs(STDOUT,
+            fputs(
+                STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
                 . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->message\n"
             );
@@ -38,6 +39,27 @@ function show_old_etas(array &$pending_etas) {
         $old_eta = NULL;
     }
     fflush(STDOUT);
+}
+
+function debug_output(string $line) {
+    global $debug;
+    if ($debug) {
+        fputs(STDERR, "$line\n");
+        fflush(STDERR);
+    }
+}
+
+if (in_array('--debug', $argv, TRUE)) {
+    $debug = TRUE;
+    $argv = array_values(
+        array_filter(
+            $argv,
+            function ($item) {
+                return $item !== '--debug';
+            }
+        )
+    );
+    $argc = count($argv);
 }
 
 if ($argc < 3) {
@@ -92,16 +114,22 @@ $pending_etas = [];
 $stop_id = $stop->stopId;
 
 do {
+    /** @var Eta[]|NoEta $etas */
     $etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound);
+    debug_output('ETA queried at ' . (new DateTimeImmutable())->format("Y-m-d H:i:s"));
     if (!$etas instanceof NoEta) {
-        foreach ($etas as &$eta) {
+        foreach ($etas as $eta) {
+            debug_output($eta->time->format("Y-m-d H:i:s"));
             foreach ($pending_etas as &$old_eta) {
                 if ($old_eta !== NULL && abs($eta->time->getTimestamp() - $old_eta->time->getTimestamp()) <= 60) {
                     $old_eta = NULL;
                 }
             }
         }
+    } else {
+        debug_output(strip_tags($etas->content));
     }
+    debug_output('');
 
     show_old_etas($pending_etas);
 
