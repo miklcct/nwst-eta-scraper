@@ -24,15 +24,19 @@ function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv
     throw $e;
 }
 
+/**
+ * @param Eta[] $pending_etas
+ */
 function show_old_etas(array $pending_etas) {
     foreach ($pending_etas as $old_eta) {
         if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -60) {
             fputs(STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
-                . "\t$old_eta->rdv\t$old_eta->providingCompany\t$old_eta->message\n"
+                . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->message\n"
             );
         }
     }
+    fflush(STDOUT);
 }
 
 if ($argc < 3) {
