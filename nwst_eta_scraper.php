@@ -33,7 +33,7 @@ function show_old_etas(array &$pending_etas) {
             fputs(
                 STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
-                . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->description\n$old_eta->message\n"
+                . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->description\t$old_eta->message\n"
             );
             $old_eta = NULL;
         }
