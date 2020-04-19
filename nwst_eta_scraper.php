@@ -35,8 +35,8 @@ function show_old_etas(array &$pending_etas) {
                 $old_eta->time->format('Y-m-d H:i:s')
                 . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->message\n"
             );
+            $old_eta = NULL;
         }
-        $old_eta = NULL;
     }
     fflush(STDOUT);
 }
