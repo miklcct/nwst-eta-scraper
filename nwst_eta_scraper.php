@@ -13,6 +13,7 @@ use Miklcct\Nwst\Model\RouteStop;
 use Miklcct\Nwst\Model\VariantInfo;
 
 require __DIR__ . '/vendor/autoload.php';
+const TOLERANCE = 90;
 
 function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv $rdv, string $bound) {
     for ($i = 0; $i < 3; ++$i) {
@@ -29,7 +30,7 @@ function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv
  */
 function show_old_etas(array &$pending_etas) {
     foreach ($pending_etas as &$old_eta) {
-        if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -60) {
+        if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -TOLERANCE) {
             fputs(
                 STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
@@ -125,7 +126,7 @@ do {
         foreach ($etas as $eta) {
             debug_output($eta->time->format("Y-m-d H:i:s"));
             foreach ($pending_etas as &$old_eta) {
-                if ($old_eta !== NULL && abs($eta->time->getTimestamp() - $old_eta->time->getTimestamp()) <= 60) {
+                if ($old_eta !== NULL && abs($eta->time->getTimestamp() - $old_eta->time->getTimestamp()) <= TOLERANCE) {
                     $old_eta = NULL;
                 }
             }
