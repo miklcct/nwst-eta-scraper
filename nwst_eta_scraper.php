@@ -27,14 +27,15 @@ function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv
 /**
  * @param Eta[] $pending_etas
  */
-function show_old_etas(array $pending_etas) {
-    foreach ($pending_etas as $old_eta) {
+function show_old_etas(array &$pending_etas) {
+    foreach ($pending_etas as &$old_eta) {
         if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -60) {
             fputs(STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
                 . "\t$old_eta->rdv\t$old_eta->destination\t$old_eta->providingCompany\t$old_eta->message\n"
             );
         }
+        $old_eta = NULL;
     }
     fflush(STDOUT);
 }
@@ -90,18 +91,25 @@ fflush(STDOUT);
 $pending_etas = [];
 $stop_id = $stop->stopId;
 
-while (!(($etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound)) instanceof NoEta)) {
-    foreach ($etas as &$eta) {
-        foreach ($pending_etas as &$old_eta) {
-            if ($old_eta !== NULL && abs($eta->time->getTimestamp() - $old_eta->time->getTimestamp()) <= 60) {
-                $old_eta = NULL;
+do {
+    $etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound);
+    if (!$etas instanceof NoEta) {
+        foreach ($etas as &$eta) {
+            foreach ($pending_etas as &$old_eta) {
+                if ($old_eta !== NULL && abs($eta->time->getTimestamp() - $old_eta->time->getTimestamp()) <= 60) {
+                    $old_eta = NULL;
+                }
             }
         }
     }
 
     show_old_etas($pending_etas);
 
-    $pending_etas = $etas;
+    if (!$etas instanceof NoEta) {
+        $pending_etas = $etas;
+    }
+    $pending_etas = array_values(array_filter($pending_etas));
+
     usort(
         $pending_etas
         , function (Eta $a, Eta $b) {
@@ -110,7 +118,6 @@ while (!(($etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound)
     );
 
     sleep(10);
-}
+} while ($pending_etas !== []);
 
-show_old_etas($pending_etas);
 fputs(STDOUT, 'Scraping finished at ' . (new DateTimeImmutable())->format('Y-m-d H:i:s') . ".\n");
