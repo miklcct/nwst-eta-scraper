@@ -114,10 +114,14 @@ $pending_etas = [];
 $stop_id = $stop->stopId;
 
 do {
-    /** @var Eta[]|NoEta $etas */
-    $etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound);
     debug_output('ETA queried at ' . (new DateTimeImmutable())->format("Y-m-d H:i:s"));
-    if (!$etas instanceof NoEta) {
+    try {
+        /** @var Eta[]|NoEta $etas */
+        $etas = get_eta($api, $routeNumber, $sequence, $stop_id, $rdv, $bound);
+    } catch (Throwable $e) {
+        $etas = $e;
+    }
+    if (is_array($etas)) {
         foreach ($etas as $eta) {
             debug_output($eta->time->format("Y-m-d H:i:s"));
             foreach ($pending_etas as &$old_eta) {
@@ -126,14 +130,16 @@ do {
                 }
             }
         }
-    } else {
+    } elseif ($etas instanceof NoEta) {
         debug_output(strip_tags($etas->content));
+    } elseif ($etas instanceof Throwable) {
+        debug_output($etas->__toString());
     }
     debug_output('');
 
     show_old_etas($pending_etas);
 
-    if (!$etas instanceof NoEta) {
+    if (is_array($etas)) {
         $pending_etas = $etas;
     }
     $pending_etas = array_values(array_filter($pending_etas));
