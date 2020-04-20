@@ -123,6 +123,13 @@ do {
         $etas = $e;
     }
     if (is_array($etas)) {
+        // filter out "KMB cycle"
+        $etas = array_filter(
+            $etas
+            , function (Eta $eta) {
+                return strpos($eta->message, 'cycle') === FALSE;
+            }
+        );
         foreach ($etas as $eta) {
             debug_output($eta->time->format("Y-m-d H:i:s"));
             foreach ($pending_etas as &$old_eta) {
