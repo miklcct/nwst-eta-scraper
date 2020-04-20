@@ -138,7 +138,7 @@ do {
     }
     debug_output('');
 
-    show_old_etas($pending_etas, !is_array($eta));
+    show_old_etas($pending_etas, !is_array($etas));
 
     if (is_array($etas)) {
         $pending_etas = $etas;
