@@ -28,9 +28,9 @@ function get_eta(Api $api, string $routeNumber, int $sequence, int $stop_id, Rdv
 /**
  * @param Eta[] $pending_etas
  */
-function show_old_etas(array &$pending_etas) {
+function show_old_etas(array &$pending_etas, bool $no_eta) {
     foreach ($pending_etas as &$old_eta) {
-        if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= -TOLERANCE) {
+        if ($old_eta !== NULL && time() - $old_eta->time->getTimestamp() >= ($no_eta ? TOLERANCE : -TOLERANCE)) {
             fputs(
                 STDOUT,
                 $old_eta->time->format('Y-m-d H:i:s')
@@ -138,7 +138,7 @@ do {
     }
     debug_output('');
 
-    show_old_etas($pending_etas);
+    show_old_etas($pending_etas, !is_array($eta));
 
     if (is_array($etas)) {
         $pending_etas = $etas;
