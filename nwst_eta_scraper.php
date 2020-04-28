@@ -113,6 +113,7 @@ fflush(STDOUT);
 /** @var Eta[] $pending_etas */
 $pending_etas = [];
 $stop_id = $stop->stopId;
+$run = FALSE;
 
 do {
     debug_output('ETA queried at ' . (new DateTimeImmutable())->format("Y-m-d H:i:s"));
@@ -123,6 +124,7 @@ do {
         $etas = $e;
     }
     if (is_array($etas)) {
+        $run = TRUE;
         // filter out "KMB cycle"
         $etas = array_filter(
             $etas
@@ -160,6 +162,6 @@ do {
     );
 
     sleep(10);
-} while ($pending_etas !== []);
+} while ($pending_etas !== [] || !$run);
 
 fputs(STDOUT, 'Scraping finished at ' . (new DateTimeImmutable())->format('Y-m-d H:i:s') . ".\n");
